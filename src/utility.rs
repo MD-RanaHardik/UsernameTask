@@ -1,26 +1,25 @@
 extern crate regex;
+use rand::distributions::{Alphanumeric, DistString};
+
 use crate::{is_anyone_login, password_validation, username_validation, UserDetails};
 
-use std::{collections::HashMap, io, path, string};
+use std::{collections::HashMap, io};
 
-
-
-pub fn read_input(type_of_input:String) -> String {
-    println!("Enter {} :",type_of_input);
+pub fn read_input(type_of_input: String) -> String {
+    println!("Enter {} :", type_of_input);
     let mut data = String::new();
-    let input = io::stdin().read_line(&mut data);
+    let _input = io::stdin().read_line(&mut data);
     return data.trim().to_string();
 }
 
 pub fn read_user_chois() -> String {
-    
     let mut choice = String::new();
-    let input = io::stdin().read_line(&mut choice);
+    let _input = io::stdin().read_line(&mut choice);
     return choice.trim().to_string();
 }
 
 pub fn check_and_add_user(users: &mut HashMap<String, UserDetails>, username: &String) {
-    if (users.contains_key(username.as_str())) {
+    if users.contains_key(username.as_str()) {
         println!("Username is already exist");
     } else {
         let mut is_read_password = true;
@@ -39,7 +38,6 @@ pub fn check_and_add_user(users: &mut HashMap<String, UserDetails>, username: &S
                         Number: 1234567890,
                     };
 
-                    
                     users.insert(username.to_string(), userdetails);
 
                     println!("Account is successfully generated using {}.", username);
@@ -64,10 +62,6 @@ pub fn signup(users: &mut HashMap<String, UserDetails>) {
     }
 }
 
-
-
-
-
 pub fn login(users: &mut HashMap<String, UserDetails>) {
     unsafe {
         if is_anyone_login {
@@ -76,10 +70,6 @@ pub fn login(users: &mut HashMap<String, UserDetails>) {
             let username = read_input("username".to_string());
             let password = read_input("password".to_string());
 
-
-            
-
-            
             match users.get(&username) {
                 Some(value) => {
                     if password == value.Password {
@@ -97,7 +87,7 @@ pub fn login(users: &mut HashMap<String, UserDetails>) {
 
 pub fn logout() {
     unsafe {
-        if (is_anyone_login) {
+        if is_anyone_login {
             is_anyone_login = false;
             println!("You're successfully logged out");
         } else {
@@ -106,49 +96,61 @@ pub fn logout() {
     }
 }
 
-// pub fn validate_and_change_details(username: &String,users: &mut HashMap<String, UserDetails>){
-//     let name = read_input("name".to_string());
-//     let address = read_input("name".to_string());
-//     let number = read_input("name".to_string()).parse::<u128>().unwrap();
+pub fn validate_and_change_details(username: &String, users: &mut HashMap<String, UserDetails>) {
+    match users.get(username) {
+        Some(_value) => {
+            let name = read_input("name".to_string());
+            let address = read_input("address".to_string());
+            let number = read_input("number".to_string());
 
-//     if(!name.is_empty()){
-//         users.get_mut(usernam) =
+            if !name.is_empty() {
+                (users.get_mut(username).unwrap()).Name = name;
+            }
+            if !address.is_empty() {
+                (users.get_mut(username).unwrap()).Address = address;
+            }
+            if !number.to_string().is_empty() && number.to_string().len() == 10 {
+                (users.get_mut(username).unwrap()).Number = number.parse::<u128>().unwrap();
+            } else {
+                println!("Please number must be equals to 10");
+            }
 
-//         users[username].Name = name;
-        
-//     }
-//     if(!address.is_empty()){
-//         users[username].Address = address;
-        
-//     }
-//     if(number.to_string().len() ==10){
-//         users[username].Number = number;
-        
-//     }else{
-//         println!("Please number must be equals to 10");
-//     }
+            println!("{:?}", users.get(username));
 
-//     println!("Details updated");
+            println!("Details updated");
+        }
+        None => println!("Account not exist for {} username ", username),
+    }
+}
 
+pub fn update_details(users: &mut HashMap<String, UserDetails>) {
+    unsafe {
+        if is_anyone_login {
+            let username = read_input("username".to_string());
+            validate_and_change_details(&username, users);
+        } else {
+            println!("Please login before going to change anything.")
+        }
+    }
+}
 
-// }
+pub fn delete_user(users: &mut HashMap<String, UserDetails>) {
+    let username = read_input("username".to_string());
+    let capcha = Alphanumeric.sample_string(&mut rand::thread_rng(), 8);
 
+    match users.get(&username) {
+        Some(_value) => {
+            println!("Capcha : {}", capcha);
+            let user_writen_capcha = read_input("capcha".to_string());
 
-
-
-// pub fn update_details(users: &mut HashMap<String, UserDetails>) {
-//     unsafe {
-//         if (is_anyone_login) {
-//             let username = read_input("username".to_string());
-//             match users.get(&username) {
-//                 Some(value) =>{
-//                     validate_and_change_details(&username,users);
-//                 },
-//                 None=>println!("Account not exist for {} username ",username),
-                
-//             }
-//         } else {
-//             println!("Please login before going to change anything.")
-//         }
-//     }
-// }
+            if user_writen_capcha == capcha {
+                users.remove(&username);
+                println!("Account deleted successsfully");
+                logout();
+            } else {
+                println!("Please enter correct capcha code");
+            }
+        }
+        None => println!("Please check username and password"),
+    }
+}
