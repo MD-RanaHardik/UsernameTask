@@ -17,7 +17,7 @@ pub struct UserDetails {
 }
 static  mut is_anyone_login:bool =false;
 
-
+static  mut is_anddddddyone_login:bool =false;
 
 fn main() {
     
