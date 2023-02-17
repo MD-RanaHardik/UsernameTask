@@ -26,8 +26,9 @@ pub fn validate_username(username: &String) -> String {
 pub fn check_username_availibility(users: &mut HashMap<String, UserDetails>) {
     let username = utility::read_input("username".to_string());
     if users.contains_key(&username) {
-        println!("{} is already taken by another user.", &username);
+        utility::propper_output(format!("{} is already taken by another user.", &username).as_str());
     } else {
-        println!("{} is available.", &username)
+        utility::propper_output(format!("{} is available.", &username).as_str());
+       
     }
 }
